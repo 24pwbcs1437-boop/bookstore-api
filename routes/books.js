@@ -4,20 +4,14 @@ const Book = require("../models/Book");
 
 // GET all books
 router.get("/", async (req, res) => {
-  const books = await Book.find();
-  res.json(books);
-});
-
-// CREATE a book
-router.post("/", async (req, res) => {
   try {
-    const newBook = new Book(req.body);
-    const savedBook = await newBook.save();
-    res.status(201).json(savedBook);
+    const books = await Book.find();
+    res.json(books);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 // GET single book by ID
 router.get("/:id", async (req, res) => {
   try {
@@ -32,9 +26,38 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-module.exports = router;
 
+// CREATE a book
+router.post("/", async (req, res) => {
+  try {
+    const newBook = new Book(req.body);
+    const savedBook = await newBook.save();
+    res.status(201).json(savedBook);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
+// UPDATE a book
+router.put("/:id", async (req, res) => {
+  try {
+    const updatedBook = await Book.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+
+    if (!updatedBook) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    res.json(updatedBook);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE a book
 router.delete("/:id", async (req, res) => {
   try {
     const deletedBook = await Book.findByIdAndDelete(req.params.id);
@@ -49,20 +72,4 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
-  try {
-    const updatedBook = await Book.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true } // this returns updated data
-    );
-
-    if (!updatedBook) {
-      return res.status(404).json({ message: "Book not found" });
-    }
-
-    res.json(updatedBook);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+module.exports = router;
